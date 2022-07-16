@@ -12,3 +12,8 @@ export const sendcode = (mobile) => {
     url: `/v1_0/sms/codes/${mobile}`
   })
 }
+export const getuserinfo = () => {
+  return request({
+    url: '/v1_0/user'
+  })
+}

@@ -19,7 +19,7 @@
       </van-field>
       <van-field
         v-model="code"
-        type="password"
+        type="text"
         name="code"
         placeholder="请输入验证码"
         :rules="coderules"

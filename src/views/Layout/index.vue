@@ -1,6 +1,5 @@
 <template>
   <div>
-    布局页面
     <router-view></router-view>
     <van-tabbar class="tab-bar" route>
       <van-tabbar-item to="/ ">
@@ -24,7 +23,7 @@
       <van-tabbar-item to="/profile">
         <template #icon>
           <i class="toutiao toutiao-wode"></i>
-          <p>我的</p>
+          <p>{{ $store.state.user.token ? '我的' : '未登录' }}</p>
         </template>
       </van-tabbar-item>
     </van-tabbar>
@@ -32,8 +31,7 @@
 </template>
 
 <script>
-export default {
-}
+export default {}
 </script>
 
 <style scoped lang="less">
