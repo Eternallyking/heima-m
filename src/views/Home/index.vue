@@ -9,23 +9,38 @@
       <van-tab :title="item.name" v-for="item in mychannels" :key="item.id"
         ><ArticleList :id="item.id"></ArticleList
       ></van-tab>
-      <i class="toutiao toutiao-gengduo"></i>
+      <i class="toutiao toutiao-gengduo" @click="$refs.popup.isshow = true"></i>
     </van-tabs>
+    <EditChannel
+      ref="popup"
+      :mychannels="mychannels"
+      @delmy-channel="delmychannel"
+      @change-channel="changechannelfn"
+      @add-channel="addchannelfn"
+    ></EditChannel>
   </div>
 </template>
 
 <script>
-import { getmychannels } from '@/api'
+import {
+  getmychannels,
+  getmychannelsbylocal,
+  setmychannelstolocal,
+  DelMyChannel,
+  AddMyChannel
+} from '@/api'
 import ArticleList from './component/ArticleList'
+import EditChannel from './component/EditChannel.vue'
 export default {
   data() {
     return {
-      active: 2,
+      active: 0,
       mychannels: []
     }
   },
   components: {
-    ArticleList
+    ArticleList,
+    EditChannel
   },
   created() {
     this.getmychannels()
@@ -33,11 +48,51 @@ export default {
   methods: {
     async getmychannels() {
       try {
-        const { data } = await getmychannels()
-        this.mychannels = data.data.channels
+        if (!this.$store.state.user.token) {
+          if (getmychannelsbylocal()) {
+            this.mychannels = getmychannelsbylocal()
+          } else {
+            const { data } = await getmychannels()
+            this.mychannels = data.data.channels
+          }
+        } else {
+          const { data } = await getmychannels()
+          this.mychannels = data.data.channels
+        }
       } catch (error) {
         this.$toast.fail('请重新获取频道列表')
       }
+    },
+    async delmychannel(id) {
+      this.mychannels = this.mychannels.filter((item) => item.id !== id)
+      if (!this.$store.state.user.token) {
+        console.log(1)
+        setmychannelstolocal(this.mychannels)
+      } else {
+        try {
+          const { data } = await DelMyChannel(id)
+          console.log(data)
+        } catch (error) {
+          return this.$toast.fail('删除用户频道失败')
+        }
+      }
+      this.$toast.success('删除用户频道成功')
+    },
+    changechannelfn(active) {
+      this.active = active
+    },
+    async addchannelfn(item) {
+      this.mychannels.push(item)
+      if (!this.$store.state.user.token) {
+        setmychannelstolocal(this.mychannels)
+      } else {
+        try {
+          await AddMyChannel(item.id, this.mychannels.length)
+        } catch (error) {
+          return this.$toast.fail('添加频道失败')
+        }
+      }
+      this.$toast.success('添加频道成功')
     }
   }
 }
@@ -89,9 +144,12 @@ export default {
     }
   }
 }
-
+:deep(.van-tabs__content) {
+  margin-bottom: 100px;
+}
 /* 字体图标 */
 .toutiao-gengduo {
+  z-index: 99;
   position: absolute;
   top: 0;
   right: 0;
@@ -113,5 +171,26 @@ export default {
     width: 1px;
     background-image: url('~@/assets/images/gradient-gray-line.png');
   }
+}
+// 头部固定的样式
+.navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+}
+:deep(.van-tabs__wrap) {
+  position: sticky;
+  top: 92px;
+  left: 0;
+  z-index: 99;
+}
+.toutiao-gengduo {
+  position: fixed;
+  top: 92px;
+}
+
+:deep(.van-tabs__content) {
+  max-height: calc(100vh - 92px - 82px - 100px);
+  overflow: auto;
 }
 </style>
