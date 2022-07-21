@@ -10,6 +10,7 @@
         @focus="visiblesearchsuggestion"
         background="#3296fa"
         class="search"
+        clearable
       />
     </form>
     <component
