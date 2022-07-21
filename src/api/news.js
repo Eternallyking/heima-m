@@ -9,3 +9,8 @@ export const getarticlelist = (channelid, timestamp) => {
     }
   })
 }
+export const getnewsdetail = (id) => {
+  return request({
+    url: `/v1_0/articles/${id}`
+  })
+}
