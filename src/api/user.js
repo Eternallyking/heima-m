@@ -17,3 +17,18 @@ export const getuserinfo = () => {
     url: '/v1_0/user'
   })
 }
+export const concernusers = (target) => {
+  return request({
+    url: '/v1_0/user/followings',
+    method: 'post',
+    data: {
+      target
+    }
+  })
+}
+export const Cancelconcernusers = (target) => {
+  return request({
+    url: `/v1_0/user/followings/${target}`,
+    method: 'DELETE'
+  })
+}

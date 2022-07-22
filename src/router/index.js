@@ -37,7 +37,7 @@ const routes = [
   },
   {
     path: '/detail',
-    component: () => import('@/components/Detail')
+    component: () => import('@/views/Detail')
   }
 ]
 

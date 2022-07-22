@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click="newsdetail">
     <van-cell
       v-if="articleinfo.cover.type === 0"
       :title="articleinfo.title"
@@ -45,6 +45,16 @@ export default {
       return `${this.articleinfo.aut_name} ${
         this.articleinfo.comm_count
       }评论 ${dayjs(this.articleinfo.pubdate).fromNow()}`
+    }
+  },
+  methods: {
+    newsdetail() {
+      this.$router.push({
+        path: '/detail',
+        query: {
+          id: this.articleinfo.art_id
+        }
+      })
     }
   }
 }

@@ -14,3 +14,18 @@ export const getnewsdetail = (id) => {
     url: `/v1_0/articles/${id}`
   })
 }
+export const newThumbsup = (target) => {
+  return request({
+    url: '/v1_0/article/collections',
+    method: 'POST',
+    data: {
+      target
+    }
+  })
+}
+export const CancelnewThumbsup = (target) => {
+  return request({
+    url: `/v1_0/article/collections/${target}`,
+    method: 'DELETE'
+  })
+}
