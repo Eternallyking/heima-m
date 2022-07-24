@@ -21,10 +21,9 @@
             </div>
             <div class="text">
               <div class="name">{{ newsdetail.aut_name }}</div>
-              <div class="time">3年前</div>
+              <div class="time">{{ times(newsdetail.pubdate) }}</div>
             </div>
             <div class="follow">
-              <!-- <button></button> -->
               <van-button
                 type="info"
                 :loading="concernloading"
@@ -54,40 +53,153 @@
             style="padding: 0 0.4rem"
             v-html="newsdetail.content"
           ></div>
-          <!-- style="font-size: 0.21333rem" -->
         </div>
         <div>
           <van-divider>正文结束</van-divider>
         </div>
-        <div>
-          <div class="comment" v-for="item in commentslist" :key="item.com_id">
+        <van-list
+          v-model="loading"
+          :finished="finished"
+          finished-text="没有更多了"
+          @load="onLoaddetail"
+          :immediate-check="false"
+        >
+          <van-cell
+            class="comment"
+            v-for="item in commentslist"
+            :key="item.com_id"
+          >
             <div class="avatar">
-              <!-- < img :src="item.aut_photo" alt="" /> -->
               <van-image round :src="item.aut_photo" />
             </div>
             <div class="rightside">
               <div class="firstline">
                 <span class="username">{{ item.aut_name }}</span>
                 <span class="toutiao toutiao-dianzan"
-                  ><span class="support-left">赞</span></span
+                  ><span class="support-left">{{
+                    item.like_count !== 0 ? item.like_count : '赞'
+                  }}</span></span
                 >
               </div>
               <div>{{ item.content }}</div>
               <div class="thirdline">
-                <span class="lasttime">{{ item.pubdate }}</span
-                ><button class="btn-return">回复{{ item.reply_count }}</button>
+                <span class="lasttime">{{ times(item.pubdate) }}</span
+                ><button class="btn-return" @click="Replycommentsfn(item)">
+                  回复{{ item.reply_count }}
+                </button>
+                <van-popup
+                  v-model="Replycomments"
+                  position="bottom"
+                  :style="{ height: '100%' }"
+                >
+                  <van-nav-bar
+                    class="nav-replycomments"
+                    :title="
+                      replycomments.reply_count == 0
+                        ? '暂无回复'
+                        : replycomments.reply_count + '条回复'
+                    "
+                    @click-left="Replycomments = !Replycomments"
+                  >
+                    <template #left>
+                      <van-icon name="cross" />
+                    </template>
+                  </van-nav-bar>
+                  <div class="reply-comments-main">
+                    <van-cell>
+                      <div class="avatar">
+                        <van-image round :src="replycomments.aut_photo" />
+                      </div>
+                      <div class="rightside">
+                        <div class="firstline">
+                          <span class="username">{{
+                            replycomments.aut_name
+                          }}</span>
+                          <span class="toutiao toutiao-dianzan"
+                            ><span class="support-left">{{
+                              replycomments.like_count !== 0
+                                ? replycomments.like_count
+                                : '赞'
+                            }}</span></span
+                          >
+                        </div>
+                        <div>{{ replycomments.content }}</div>
+                        <div class="thirdline">
+                          <span class="lasttime">{{
+                            times(replycomments.pubdate)
+                          }}</span
+                          ><button class="btn-return">
+                            回复{{ replycomments.reply_count }}
+                          </button>
+                        </div>
+                      </div>
+                    </van-cell>
+                    <van-cell class="all-reply">全部回复</van-cell>
+                    <van-list
+                      v-model="replyloading"
+                      :finished="replyfinished"
+                      finished-text="没有更多了"
+                      @load="replyonLoaddetail"
+                      :immediate-check="false"
+                    >
+                      <van-cell
+                        class="comment"
+                        v-for="item in Replycommentslist"
+                        :key="item.com_id"
+                      >
+                        <div class="avatar">
+                          <van-image round :src="item.aut_photo" />
+                        </div>
+                        <div class="rightside">
+                          <div class="firstline">
+                            <span class="username">{{ item.aut_name }}</span>
+                            <span class="toutiao toutiao-dianzan"
+                              ><span class="support-left">{{
+                                item.like_count !== 0 ? item.like_count : '赞'
+                              }}</span></span
+                            >
+                          </div>
+                          <div>{{ item.content }}</div>
+                          <div class="thirdline">
+                            <span class="lasttime">{{
+                              times(item.pubdate)
+                            }}</span
+                            ><button class="btn-return">
+                              回复{{ item.reply_count }}
+                            </button>
+                          </div>
+                        </div>
+                      </van-cell>
+                    </van-list>
+                  </div>
+                  <div class="reply-comments">
+                    <van-button
+                      round
+                      @click="isreplycomments = !isreplycomments"
+                      >评论</van-button
+                    >
+                    <van-action-sheet
+                      v-model="isreplycomments"
+                      :round="false"
+                      class="reply-comments-publish"
+                    >
+                      <van-field
+                        v-model="replymessage"
+                        rows="2"
+                        autosize
+                        type="textarea"
+                        maxlength="50"
+                        placeholder="请输入留言"
+                        show-word-limit
+                      />
+                      <van-button @click="replypublishfn">发布</van-button>
+                    </van-action-sheet>
+                  </div>
+                </van-popup>
               </div>
             </div>
-          </div>
-          <!-- <van-list
-          v-model="loading"
-          :finished="finished"
-          finished-text="没有更多了"
-          @load="onLoad"
-        >
-          <van-cell v-for="item in list" :key="item" :title="item" />
-        </van-list> -->
-        </div>
+          </van-cell>
+        </van-list>
       </div>
     </div>
 
@@ -112,7 +224,7 @@
 
       <div class="right">
         <div class="icon">
-          <div class="num">{{ newsdetail.comm_count }}</div>
+          <div class="num">{{ total_count }}</div>
           <van-icon name="comment-o" />
         </div>
         <div class="icon">
@@ -131,7 +243,14 @@
         <div class="icon">
           <van-icon name="good-job-o" />
         </div>
-        <div class="icon"><van-icon name="share" /></div>
+        <div class="icon">
+          <van-icon name="share" @click="showShare = true" />
+          <van-share-sheet
+            v-model="showShare"
+            title="立即分享给好友"
+            :options="options"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -139,13 +258,16 @@
 
 <script>
 import '@/assets/style/index.css'
+import dayjs from '@/utils/dayjs'
+import { ImagePreview } from 'vant'
 import {
   getnewsdetail,
   concernusers,
   Cancelconcernusers,
   newThumbsup,
   CancelnewThumbsup,
-  getcomments
+  getcomments,
+  newscomments
 } from '@/api'
 export default {
   data() {
@@ -156,7 +278,33 @@ export default {
       iscollection: false,
       isreview: false,
       message: '',
-      commentslist: []
+      commentslist: [],
+      loading: false,
+      finished: false,
+      total_count: 0,
+      showShare: false,
+      options: [
+        [
+          { name: '微信', icon: 'wechat' },
+          { name: '朋友圈', icon: 'wechat-moments' },
+          { name: '微博', icon: 'weibo' },
+          { name: 'QQ', icon: 'qq' }
+        ],
+        [
+          { name: '复制链接', icon: 'link' },
+          { name: '分享海报', icon: 'poster' },
+          { name: '二维码', icon: 'qrcode' },
+          { name: '小程序码', icon: 'weapp-qrcode' }
+        ]
+      ],
+      Replycomments: false,
+      Replycommentslist: [],
+      replycomments: {},
+      replyloading: false,
+      replyfinished: false,
+      isreplycomments: false,
+      replymessage: '',
+      imgAllList: []
     }
   },
   created() {
@@ -164,37 +312,112 @@ export default {
   },
   methods: {
     async getnewsdetail() {
-      const res = await getnewsdetail(this.$route.query.id)
+      const res = await getnewsdetail(this.$route.params.id)
       this.newsdetail = res.data.data
       this.concernloading = this.newsdetail.is_followed
       this.iscollection = this.newsdetail.is_collected
       const { data } = await getcomments('a', this.newsdetail.art_id)
+      if (data.data.results.length === 0) {
+        this.finished = true
+      }
       this.commentslist = data.data.results
+      this.total_count = data.data.total_count
+
+      this.$nextTick(() => {
+        const imgAll = document.querySelectorAll('img')
+        this.imgAllList = imgAll // console.log(this.imgAllList) // 把图片地址添加到数组中
+        const images = []
+        this.imgAllList.forEach((item, index) => {
+          images.push(item.src) // 循环添加点击事件 和添加图片地址
+          item.onclick = () => {
+            ImagePreview({ images, startPosition: index, closeable: true })
+          }
+        })
+      })
     },
     async concernusersfn(id) {
       await concernusers(id)
       this.concernloading = !this.concernloading
+      this.$toast.success('关注成功')
     },
     async Cancelconcernusersfn(id) {
       await Cancelconcernusers(id)
       this.concernloading = !this.concernloading
+      this.$toast.success('取消关注')
     },
     async collectionfn(id) {
       try {
-        const res = await newThumbsup(id)
+        await newThumbsup(id)
         this.iscollection = !this.iscollection
-        console.log(res)
+        this.$toast.success('收藏成功')
       } catch (error) {
         console.log(error)
       }
     },
     async Cancelcollectionfn(id) {
-      const res = await CancelnewThumbsup(id)
+      await CancelnewThumbsup(id)
       this.iscollection = !this.iscollection
-      console.log(res)
+      this.$toast.success('取消收藏')
     },
-    publishfn() {
-      console.log(1)
+    async onLoaddetail() {
+      const off = this.commentslist[this.commentslist.length - 1].com_id
+      const { data } = await getcomments('a', this.newsdetail.art_id, off)
+      if (data.data.results.length === 0) {
+        this.finished = true
+      }
+      this.commentslist.push(...data.data.results)
+      this.loading = false
+    },
+    async publishfn() {
+      try {
+        const res = await newscomments(this.newsdetail.art_id, this.message)
+        this.commentslist.unshift(res)
+        this.total_count++
+        this.$router.go(0)
+        this.$toast.success('评论成功')
+      } catch (error) {
+        this.$toast.fail('评论失败')
+      }
+      this.isreview = false
+    },
+    async Replycommentsfn(item) {
+      // console.log(item)
+      this.replycomments = item
+      this.Replycomments = !this.Replycomments
+      const { data } = await getcomments('c', item.com_id)
+      this.Replycommentslist = data.data.results
+    },
+    async replyonLoaddetail() {
+      const id =
+        this.Replycommentslist[this.Replycommentslist.length - 1].com_id
+      const res = await getcomments('c', this.replycomments.com_id, id)
+      this.Replycommentslist.push(...res.data.data.results)
+      if (res.data.data.results.length === 0) {
+        this.replyfinished = true
+      }
+      this.replyloading = false
+    },
+    async replypublishfn() {
+      try {
+        const res = await newscomments(
+          this.replycomments.com_id,
+          this.replymessage,
+          this.replycomments.aut_id
+        )
+        this.commentslist.unshift(res)
+        this.$toast.success('评论成功')
+      } catch (error) {
+        this.$toast.fail('评论失败')
+      }
+      this.isreplycomments = false
+      this.$router.go(0)
+    }
+  },
+  computed: {
+    times() {
+      return (times) => {
+        return dayjs(times).fromNow()
+      }
     }
   }
 }
@@ -366,12 +589,15 @@ export default {
   display: flex;
   font-size: 0.42667rem;
   margin-bottom: 40px;
+  .van-cell__value {
+    display: flex;
+  }
   .avatar {
     width: 72px;
     height: 72px;
     // background-color: pink;
     margin-right: 30px;
-    margin-left: 30px;
+    // margin-left: 30px;
     .van-image {
       width: 100%;
       height: 100%;
@@ -423,5 +649,50 @@ export default {
 }
 .support-left {
   margin-left: 10px;
+}
+.nav-title {
+  text-align: center;
+  color: #323233;
+  font-weight: 500;
+  font-size: 0.42667rem;
+}
+:deep(.van-popup__close-icon--top-left) {
+  top: 0.3rem;
+}
+.all-reply {
+  padding: 0.26667rem 0.42667rem;
+  font-size: 0.37333rem;
+}
+.reply-comments {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 96px;
+  background-color: #ff69b4;
+  :deep(.van-button) {
+    width: 640px;
+    height: 80px;
+  }
+}
+.nav-replycomments {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+}
+.reply-comments-main {
+  width: 100%;
+  margin-top: 120px;
+  margin-bottom: 100px;
+}
+.reply-comments-publish {
+  .van-button {
+    width: 2.3rem;
+  }
 }
 </style>

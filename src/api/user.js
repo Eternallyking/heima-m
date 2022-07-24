@@ -32,3 +32,8 @@ export const Cancelconcernusers = (target) => {
     method: 'DELETE'
   })
 }
+export const editinformation = () => {
+  return request({
+    url: '/v1_0/user/profile'
+  })
+}

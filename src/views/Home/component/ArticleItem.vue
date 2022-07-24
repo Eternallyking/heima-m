@@ -50,10 +50,10 @@ export default {
   methods: {
     newsdetail() {
       this.$router.push({
-        path: '/detail',
-        query: {
-          id: this.articleinfo.art_id
-        }
+        path: '/detail/' + this.articleinfo.art_id
+        // query: {
+        //   id: this.articleinfo.art_id
+        // }
       })
     }
   }

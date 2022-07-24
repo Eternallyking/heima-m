@@ -23,6 +23,7 @@
                 class="code-btn"
                 round
                 native-type="button"
+                @click="$router.push('/user')"
                 >编辑资料</van-button
               >
             </van-row>
@@ -134,6 +135,7 @@ export default {
   flex-direction: column;
   > .van-row {
     flex: 1;
+    padding-left: 20px;
   }
   .row-2 {
     .van-col {
