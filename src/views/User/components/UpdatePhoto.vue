@@ -68,7 +68,6 @@ export default {
   color: #fff;
 }
 .imgs {
-  /* width: 200%; */
   height: 1334px;
   width: 200%;
 }

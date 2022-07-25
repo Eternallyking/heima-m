@@ -57,3 +57,10 @@ export const uploadPhoto = (data) => {
     data
   })
 }
+
+export const userkoken = () => {
+  return request({
+    url: '/v1_0/authorizations',
+    method: 'PUT'
+  })
+}
