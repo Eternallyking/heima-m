@@ -10,6 +10,21 @@ export const getcomments = (type, source, offset, limit) => {
     }
   })
 }
+export const LikeComment = (target) => {
+  return request({
+    url: '/v1_0/comment/likings',
+    method: 'post',
+    data: {
+      target
+    }
+  })
+}
+export const cancelLikeComment = (target) => {
+  return request({
+    url: `/v1_0/comment/likings/${target}`,
+    method: 'DELETE'
+  })
+}
 export const newscomments = (target, content, id) => {
   return request({
     url: '/v1_0/comments',

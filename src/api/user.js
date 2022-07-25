@@ -37,3 +37,23 @@ export const editinformation = () => {
     url: '/v1_0/user/profile'
   })
 }
+export const editmyinformation = (name, gender, birthday, realname, intro) => {
+  return request({
+    url: '/v1_0/user/profile',
+    method: 'PATCH',
+    data: {
+      name,
+      gender,
+      birthday,
+      real_name: realname,
+      intro
+    }
+  })
+}
+export const uploadPhoto = (data) => {
+  return request({
+    url: '/v1_0/user/photo',
+    method: 'PATCH',
+    data
+  })
+}

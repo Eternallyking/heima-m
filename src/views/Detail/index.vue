@@ -75,8 +75,11 @@
             <div class="rightside">
               <div class="firstline">
                 <span class="username">{{ item.aut_name }}</span>
-                <span class="toutiao toutiao-dianzan"
-                  ><span class="support-left">{{
+                <span
+                  class="toutiao toutiao-dianzan"
+                  @click="clickCommentLike(item)"
+                  :class="{ liking: item.is_liking }"
+                  ><span style="margin-left: 0.125rem">{{
                     item.like_count !== 0 ? item.like_count : '赞'
                   }}</span></span
                 >
@@ -115,8 +118,11 @@
                           <span class="username">{{
                             replycomments.aut_name
                           }}</span>
-                          <span class="toutiao toutiao-dianzan"
-                            ><span class="support-left">{{
+                          <span
+                            class="toutiao toutiao-dianzan"
+                            :class="{ liking: item.is_liking }"
+                            @click="clickCommentLike(item)"
+                            ><span style="margin-left: 0.125rem">{{
                               replycomments.like_count !== 0
                                 ? replycomments.like_count
                                 : '赞'
@@ -153,8 +159,11 @@
                         <div class="rightside">
                           <div class="firstline">
                             <span class="username">{{ item.aut_name }}</span>
-                            <span class="toutiao toutiao-dianzan"
-                              ><span class="support-left">{{
+                            <span
+                              class="toutiao toutiao-dianzan"
+                              :class="{ liking: item.is_liking }"
+                              @click="clickCommentLike(item)"
+                              ><span style="margin-left: 0.125rem">{{
                                 item.like_count !== 0 ? item.like_count : '赞'
                               }}</span></span
                             >
@@ -267,7 +276,9 @@ import {
   newThumbsup,
   CancelnewThumbsup,
   getcomments,
-  newscomments
+  newscomments,
+  LikeComment,
+  cancelLikeComment
 } from '@/api'
 export default {
   data() {
@@ -369,19 +380,21 @@ export default {
       this.loading = false
     },
     async publishfn() {
-      try {
-        const res = await newscomments(this.newsdetail.art_id, this.message)
-        this.commentslist.unshift(res)
-        this.total_count++
-        this.$router.go(0)
-        this.$toast.success('评论成功')
-      } catch (error) {
-        this.$toast.fail('评论失败')
+      if (this.message) {
+        try {
+          const res = await newscomments(this.newsdetail.art_id, this.message)
+          this.commentslist.unshift(res)
+          this.total_count++
+          this.getnewsdetail()
+          this.$toast.success('评论成功')
+          this.message = ''
+        } catch (error) {
+          this.$toast.fail('评论失败')
+        }
+        this.isreview = false
       }
-      this.isreview = false
     },
     async Replycommentsfn(item) {
-      // console.log(item)
       this.replycomments = item
       this.Replycomments = !this.Replycomments
       const { data } = await getcomments('c', item.com_id)
@@ -406,11 +419,26 @@ export default {
         )
         this.commentslist.unshift(res)
         this.$toast.success('评论成功')
+        this.replymessage = ''
       } catch (error) {
         this.$toast.fail('评论失败')
       }
       this.isreplycomments = false
-      this.$router.go(0)
+      const { data } = await getcomments('c', this.replycomments.com_id)
+      this.Replycommentslist = data.data.results
+      this.getnewsdetail()
+    },
+    async clickCommentLike(item) {
+      if (!item.is_liking) {
+        console.log(item)
+        await LikeComment(item.com_id) // console.log(res)
+        item.like_count++
+        item.is_liking = true
+      } else {
+        await cancelLikeComment(item.com_id) // console.log(res)
+        item.like_count--
+        item.is_liking = false
+      }
     }
   },
   computed: {
@@ -607,7 +635,7 @@ export default {
     }
   }
   .rightside {
-    width: 100%;
+    width: 300px;
     height: 196px;
     display: flex;
     flex-direction: column;
@@ -647,8 +675,11 @@ export default {
     }
   }
 }
-.support-left {
-  margin-left: 10px;
+.liking {
+  &:before {
+    color: #3296fa;
+    font-weight: bold;
+  }
 }
 .nav-title {
   text-align: center;
