@@ -17,6 +17,7 @@
       <input type="file" ref="file" hidden accept=".png,.jpg" />
       <van-popup v-model="photoshow">
         <UpdatePhoto
+          v-if="photoshow"
           :photo="photo"
           @updatephoto="updatephotofn"
           @Cancel="Cancelfn"
@@ -173,6 +174,7 @@ export default {
       fr.onload = (e) => {
         this.photo = e.target.result
         this.photoshow = true
+        this.$refs.file.value = ''
       }
     })
   }
