@@ -27,7 +27,7 @@
         title="昵称"
         is-link
         :value="myinformation.name"
-        @click="isname = !isname"
+        @click="namefn"
       />
       <van-popup v-model="isname" position="bottom" :style="{ height: '100%' }">
         <van-nav-bar
@@ -51,12 +51,13 @@
         title="性别"
         is-link
         :value="{ 0: '男', 1: '女' }[myinformation.gender]"
-        @click="issex = !issex"
+        @click="sexfn"
       />
       <van-popup v-model="issex" position="bottom">
         <van-picker
           show-toolbar
           :columns="sexs"
+          :defaultIndex="sex"
           @confirm="sexonConfirmfn"
           @cancel="issex = false"
         />
@@ -65,7 +66,7 @@
         title="生日"
         is-link
         :value="myinformation.birthday"
-        @click="birthdayshow = !birthdayshow"
+        @click="birthdayfn"
       />
       <van-popup
         v-model="birthdayshow"
@@ -94,14 +95,15 @@ export default {
       myinformation: {},
       birthdayshow: false,
       minDate: new Date(1900, 0, 1),
-      maxDate: new Date(2022, 10, 1),
-      currentDate: new Date(2021, 0, 17),
+      maxDate: new Date(),
+      currentDate: new Date(),
       issex: false,
       sexs: ['男', '女'],
       isname: false,
       message: '',
       photoshow: false,
-      photo: ''
+      photo: '',
+      sex: 0
     }
   },
   created() {
@@ -136,7 +138,10 @@ export default {
         await editmyinformation(this.myinformation.name)
         this.$toast.success('更新成功')
       }
-      this.message = ''
+    },
+    namefn() {
+      this.isname = !this.isname
+      this.message = this.myinformation.name
     },
     async sexonConfirmfn(value) {
       if (value === '男') {
@@ -152,12 +157,20 @@ export default {
       this.$toast.success('更新成功')
       this.issex = false
     },
+    sexfn() {
+      this.issex = !this.issex
+      this.sex = this.myinformation.gender
+    },
     updatephotofn() {
       this.photoshow = false
       this.editinformation()
     },
     Cancelfn() {
       this.photoshow = false
+    },
+    birthdayfn() {
+      this.birthdayshow = !this.birthdayshow
+      this.currentDate = new Date(this.myinformation.birthday)
     }
   },
   mounted() {
